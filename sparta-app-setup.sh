@@ -31,4 +31,4 @@ npm install
 # node app.js
 
 # Use pm2 to start your app and ensure it runs in the background
-pm2 start app.js
+pm2 start app.js --name "sparta-test-app"
