@@ -15,18 +15,20 @@ sudo systemctl enable nginx
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Clone your app repository (replace YOUR_GIT_REPO_URL with your actual Git repository URL)
+# Install pm2 globally
+sudo npm install pm2@latest -g
+
+# Clone the app from GitHub
 git clone https://github.com/followcrom/tech257-sparta-app.git
 
-# Assuming your repository's name is 'app', if not, change the directory name accordingly
-cd app
+# Navigate to the app directory
+cd tech257-sparta-app/app
 
-# Install dependencies and run your app
+# Install dependencies
 npm install
+
+# Run your app
 node app.js
 
-# # Install pm2 globally
-# sudo npm install pm2@latest -g
-
-# # Use pm2 to start your app and ensure it runs in the background
-# pm2 start app/app.js --name "sparta-test-app"
+# Use pm2 to start your app and ensure it runs in the background
+pm2 start app.js
