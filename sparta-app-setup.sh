@@ -28,7 +28,7 @@ cd tech257-sparta-app/app
 npm install
 
 # Run your app
-node app.js
+# node app.js
 
 # Use pm2 to start your app and ensure it runs in the background
 pm2 start app.js
