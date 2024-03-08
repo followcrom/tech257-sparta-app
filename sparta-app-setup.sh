@@ -19,13 +19,14 @@ sudo apt-get install -y nodejs
 git clone https://github.com/followcrom/tech257-sparta-app.git
 
 # Assuming your repository's name is 'app', if not, change the directory name accordingly
-cd tech257-sparta-app
+cd app
 
 # Install dependencies and run your app
 npm install
+node app.js
 
-# Install pm2 globally
-sudo npm install pm2@latest
+# # Install pm2 globally
+# sudo npm install pm2@latest -g
 
-# Use pm2 to start your app and ensure it runs in the background
-pm2 start app.js --name "sparta-test-app"
+# # Use pm2 to start your app and ensure it runs in the background
+# pm2 start app/app.js --name "sparta-test-app"
