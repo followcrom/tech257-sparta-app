@@ -19,7 +19,7 @@ sudo apt-get install -y nodejs
 git clone https://github.com/followcrom/tech257-sparta-app.git
 
 # Assuming your repository's name is 'app', if not, change the directory name accordingly
-cd app
+cd tech257-sparta-app
 
 # Install dependencies and run your app
 npm install
