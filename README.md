@@ -46,9 +46,17 @@ Deployment may take a few minutes. Once complete, you can view the VM on the Azu
 
 Ensure you have Azure CLI installed. Then, run the following command:
 
+`sudo waagent -deprovision+user`
+
+Deprovisioning is the process of removing user-specific data from the VM to prepare it for being captured as an image.
+
 `az vm deallocate --resource-group tech257 --name <VM_name>`
 
+Deallocating a VM stops the VM and releases the compute resources it was using. This is necessary before capturing an image.
+
 `az vm generalize --resource-group tech257 --name <VM_name>`
+
+Generalizing a VM removes all user-specific information from the VM, including the SSH keys and the user account.
 
 From the Azure portal, navigate to the VM's overview page and click on "Capture".
 
