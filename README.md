@@ -64,7 +64,7 @@ ssh -i ~/.ssh/richard-az-key adminuser@172.167.169.127
 
 ## Run Script on new Image
 
-As the new image is a copy of the orignal VM, it already has the nginx server installed, so we can trim our deploy script a little. However, the app itself is going to be copied to a different location: **/repo/app**. Let's do that:
+As the new image is a copy of the original VM, it already has the **nginx server** installed, so we can trim our deploy script a little. However, the app itself is going to be copied to a different location: **/repo/app**, so let's do that:
 
 `sudo git clone https://github.com/followcrom/tech257-sparta-app.git /repo`
 
