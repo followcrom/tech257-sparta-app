@@ -62,6 +62,12 @@ From the Azure portal, navigate to the VM's overview page and click on "Capture"
 
 Create a new image. This time select the image type as the image just captured.
 
+## User Data
+
+User data is a script that runs when a VM is first started. This method is used to automate the setup process, including installing software, applying configurations, or running scripts without manual intervention immediately after the VM boots for the first time.
+
+**Note:** When using user data or custom data scripts for VM initialization in cloud environments like Azure, the process is generally "fire-and-forget," meaning that the script is executed without interactive feedback.
+
 ## Connect to VM Using SSH
 
 In the terminal, use the command:
