@@ -44,9 +44,13 @@ Deployment may take a few minutes. Once complete, you can view the VM on the Azu
 
 ## Make an Image of a VM
 
-Ensure you have Azure CLI installed. Then, run the following command:
+Before deallocating the VM, run the following command in the VM's terminal:
 
 `sudo waagent -deprovision+user`
+
+This command removes the user-specific data from the VM, preparing it for being captured as an image.
+
+Ensure you have Azure CLI installed. Then, run the following commands in a local terminal:
 
 Deprovisioning is the process of removing user-specific data from the VM to prepare it for being captured as an image.
 
@@ -60,13 +64,74 @@ Generalizing a VM removes all user-specific information from the VM, including t
 
 From the Azure portal, navigate to the VM's overview page and click on "Capture".
 
-Create a new image. This time select the image type as the image just captured.
+## Create a new VM from an image
+
+Select the image to clone. Create a VM using as the image, the other steps are as above.
+
+In the advanced tab, we should add our launch script as user data. This will be run when the VM is first started.
 
 ## User Data
 
 User data is a script that runs when a VM is first started. This method is used to automate the setup process, including installing software, applying configurations, or running scripts without manual intervention immediately after the VM boots for the first time.
 
 **Note:** When using user data or custom data scripts for VM initialization in cloud environments like Azure, the process is generally "fire-and-forget," meaning that the script is executed without interactive feedback.
+
+```bash
+#!/bin/bash
+
+# Update package lists
+sudo apt update -y
+
+# Upgrade packages non-interactively, and automatically handle prompts
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+
+# Install Nginx
+sudo apt install nginx -y
+
+# Restart and enable Nginx to run on startup
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+
+# Install Node.js 20.x (this also installs npm as a dependency)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+sudo apt install nodejs
+
+# Install pm2 globally
+sudo npm install pm2 -g
+
+# Clone the app from GitHub
+git clone https://github.com/followcrom/tech257-sparta-app.git
+
+# Navigate to the app directory
+cd tech257-sparta-app/app
+
+# Install dependencies
+npm install
+
+NGINX_CONF_PATH="/etc/nginx/sites-available"
+
+cd $NGINX_CONF_PATH
+
+NGINX_CONF="default"
+
+# OK in user data but not for multiple runs
+sudo cp $NGINX_CONF "${NGINX_CONF}.backup"
+
+# Display the full path of the Nginx configuration file being edited
+echo "Updating Nginx configuration in: $NGINX_CONF_PATH/$NGINX_CONF"
+
+sudo sed -i 's|try_files $uri $uri/ =404;|proxy_pass http://localhost:3000/;|' $NGINX_CONF
+
+sudo systemctl restart nginx
+
+cd -
+
+pm2 stop all
+
+# Use pm2 to start app and ensure it runs in the background
+pm2 start app.js --name "sparta-test-app"
+```
 
 ## Connect to VM Using SSH
 
@@ -83,20 +148,6 @@ As the new image is a copy of the original VM, it already has the **nginx server
 `sudo git clone https://github.com/followcrom/tech257-sparta-app.git /repo`
 
 `cd /repo/app`
-
-With the a reduced `deploy.sh`, we can attempt to install and start the app. It does not work! However, we do get this helpful error message:
-
-_The operation was rejected by your operating system. It is likely you do not have the permissions to access this file as the current user_
-
-It seems we don't have the permissions needed to install the packages in the **root** dir. Let's change the ownership of the **/repo/app** directory to the current user, with the cmd:
-
-```
-sudo chown -R $USER:$USER /repo/app
-```
-
-This specifies the new owner and group for the files and directories. `$USER` is an environment variable that represents the current logged-in user's username. When `$USER:$USER` is used in this context, it sets both the owner and the group of the files/directories to the current user.
-
-Now, the **adminuser** has read and write permissions for files and read, write, and execute permissions for directories. This setup should generally be sufficient for running `npm install` in **/repo/app**, assuming you're operating as **adminuser**.
 
 ![Cloud Image](imgs/vms/sparta-test-app.jpg "Deployed VM")
 
