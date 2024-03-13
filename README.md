@@ -94,23 +94,6 @@ sudo apt install nginx -y
 sudo systemctl restart nginx
 sudo systemctl enable nginx
 
-# Install Node.js 20.x (this also installs npm as a dependency)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-
-sudo apt install nodejs
-
-# Install pm2 globally
-sudo npm install pm2 -g
-
-# Clone the app from GitHub
-git clone https://github.com/followcrom/tech257-sparta-app.git
-
-# Navigate to the app directory
-cd tech257-sparta-app/app
-
-# Install dependencies
-npm install
-
 NGINX_CONF_PATH="/etc/nginx/sites-available"
 
 cd $NGINX_CONF_PATH
@@ -129,10 +112,77 @@ sudo systemctl restart nginx
 
 cd -
 
+# Install pm2 globally
+sudo npm install pm2 -g
+
+# Install Node.js 20.x (this also installs npm as a dependency)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+sudo apt install nodejs
+
+# Clone the app from GitHub
+git clone https://github.com/followcrom/tech257-sparta-app.git
+
+# Navigate to the app directory
+cd tech257-sparta-app/app
+
+export DB_HOST=mongodb://10.0.3.4:27017/posts
+
+echo $DB_HOST
+
+# Install dependencies
+npm install
+
 pm2 stop all
 
 # Use pm2 to start app and ensure it runs in the background
 pm2 start app.js --name "sparta-test-app"
+```
+
+## Create a VM for MongoDB
+
+We can create a VM for MongoDB in a similar way to the app VM. The main difference is that we need to install MongoDB and configure it to run as a service.
+
+```bash
+#!/bin/bash
+
+# Upgrade packages non-interactively, and automatically handle prompts
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+
+# Import the public key used by the package management system
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+   --dearmor
+
+# Add the MongoDB repository to your sources list
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+# Install the MongoDB packages
+sudo apt-get install -y mongodb-org=7.0.5 mongodb-org-database=7.0.5 mongodb-org-server=7.0.5 mongodb-org-mongos=7.0.5 mongodb-org-tools=7.0.5
+
+sudo apt update -y
+
+sudo systemctl start mongod
+
+sudo systemctl enable mongod
+
+# sudo systemctl status mongod
+
+# sudo systemctl stop mongod
+
+# sudo systemctl restart mongod
+
+cd /etc/
+
+MDB_CONF="mongod.conf"
+
+sudo cp $MDB_CONF "${MDB_CONF}.backup"
+
+sudo nano /etc/mongod.conf
+
+sudo sed -i 's|bindIp: 127.0.0.1|bindIp: 0.0.0.0|' $MDB_CONF
+
+sudo systemctl restart mongod
 ```
 
 ## Run Script on new Image
