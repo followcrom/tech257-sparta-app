@@ -147,7 +147,7 @@ Here is the reduced User Data:
 #!/bin/bash
 
 # Navigate to the app directory
-cd /repo/app
+cd repo/app/
 
 echo "Current directory: $(pwd)"
 
