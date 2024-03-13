@@ -74,7 +74,9 @@ In the advanced tab, we should add our launch script as user data. This will be 
 
 User data is a script that runs when a VM is first started. This method is used to automate the setup process, including installing software, applying configurations, or running scripts without manual intervention immediately after the VM boots for the first time.
 
-**Note:** When using user data or custom data scripts for VM initialization in cloud environments like Azure, the process is generally "fire-and-forget," meaning that the script is executed without interactive feedback.
+**Note**: When using user data or custom data scripts for VM initialization in cloud environments like Azure, the process is generally "fire-and-forget," meaning that the script is executed without interactive feedback.
+
+**Note**: We need to update the Nginx configuration to proxy requests to the app. First, we'll back up the default configuration file, then update it to proxy requests to the app running on port 3000.
 
 ```bash
 #!/bin/bash
@@ -133,21 +135,34 @@ pm2 stop all
 pm2 start app.js --name "sparta-test-app"
 ```
 
-## Connect to VM Using SSH
-
-In the terminal, use the command:
-
-```
-ssh -i ~/.ssh/richard-az-key adminuser@172.167.169.127
-```
-
 ## Run Script on new Image
 
-As the new image is a copy of the original VM, it already has the **nginx server** installed, so we can trim our deploy script a little. However, the app itself is going to be copied to a different location: **/repo/app**, so let's do that:
+As the new image is a copy of the original VM, it already has the **nginx server** installed and node modules, so we can trim our deploy script a little.
 
-`sudo git clone https://github.com/followcrom/tech257-sparta-app.git /repo`
+**Note** As we are creating the new VM from an image built for the one we buit with user Data, the app itself is in a different directory: **/repo/app**.
 
-`cd /repo/app`
+Here is the reduced User Data:
+
+```bash
+#!/bin/bash
+
+# Navigate to the app directory
+cd /repo/app
+
+echo "Current directory: $(pwd)"
+
+if pm2 list | grep -q "online"; then
+    pm2 stop all
+    echo "Stopped all running processes."
+else
+    echo "No running processes found."
+fi
+
+# Use pm2 to start app and ensure it runs in the background
+pm2 start app.js --name "sparta-test-app"
+```
+
+Then we check the app is running by navigating to the public IP address of the VM in a web browser.
 
 ![Cloud Image](imgs/vms/sparta-test-app.jpg "Deployed VM")
 
