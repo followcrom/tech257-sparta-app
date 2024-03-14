@@ -1,4 +1,4 @@
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+# curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 az login
 
@@ -14,11 +14,18 @@ az storage account update --name tech257richardstorage --resource-group tech257 
 
 az storage container create --name imgs --account-name tech257richardstorage --auth-mode login
 
-az storage container set-permission --name imgs --account-name tech257richardstorage --auth-mode login --public-access blob
+# NOTE: This DOES NOT work. Returns "The specified resource does not exist."
+az storage container set-permission --name imgs --account-name tech257richardstorage --auth-mode login --public-access container
+
+# Delay for 15 seconds
+
+sleep 15
 
 # Download a picture using the curl command
 
 curl -o ~/dice.png https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png
+
+cd
 
 # Rename the picture
 
@@ -28,8 +35,7 @@ mv dice.png dice-demo.png
 
 az storage blob upload --file dice-demo.png --container-name imgs --name dice-demo.png --account-name tech257richardstorage --auth-mode login
 
-# Make blob public
-
+# NOTE: This DOES NOT work. is this a permissions issue?
 az storage blob update --container-name imgs --name dice-demo.png --account-name tech257richardstorage --auth-mode login --content-cache-control "public, max-age=86400"
 
 cd /tech257-sparta-app/app/views
@@ -37,4 +43,4 @@ cd /tech257-sparta-app/app/views
 # Backup index.ejs
 sudo cp index.ejs index.ejs.backup
 
-sudo sed -i 's|</div>|<img src="https://tech257richardstorage.blob.core.windows.net/images/dice-demo.png">\n&|' index.ejs
+sudo sed -i 's|</div>|<img src="https://tech257richardstorage.blob.core.windows.net/imgs/dice-demo.png">\n&|' index.ejs

@@ -1,1 +1,1 @@
-sudo mv index.ejs.backup index.ejs
+sudo mv views/index.ejs.backup views/index.ejs
