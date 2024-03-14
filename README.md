@@ -235,3 +235,7 @@ After deletion, ensure that the VM and any selected associated resources no long
 - Remember that deleting the VM does not automatically delete associated resources like disks or network interfaces, which might incur charges if left undeleted.
 
 ![Cloud Image](imgs/vms/vm_delete.jpg "Delete a VM")
+
+# Two-Tier Deployment
+
+A two-tier deployment is a configuration where the application is split into two parts: the front-end and the back-end. The front-end is the part of the application that the user interacts with, while the back-end is the part that processes data and communicates with the database.
