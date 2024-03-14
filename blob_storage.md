@@ -67,7 +67,7 @@ Azure Blob Storage is structured into several key components that organize and m
 
 Azure Block Blob Storage offers various redundancy options to ensure data durability and high availability. Each redundancy option is designed to meet different requirements for availability, durability, and cost.
 
-![Redundancy Options](imgs/redundancy.png "Redundancy Options")
+![Redundancy Options](/imgs/redundancy.PNG "Redundancy Options")
 
 ## Locally Redundant Storage (LRS)
 
