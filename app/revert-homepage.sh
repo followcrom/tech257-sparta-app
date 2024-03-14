@@ -1,0 +1,1 @@
+sudo mv index.ejs.backup index.ejs
