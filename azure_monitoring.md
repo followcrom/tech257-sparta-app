@@ -77,4 +77,4 @@ Remember to regularly monitor and adjust the alert rule settings based on your s
 ![alt text](imgs/alert_email.jpg)!
 
 
-[alt text](imgs/alert_fired.jpg)
+![alt text](imgs/alert_fired.jpg)!
