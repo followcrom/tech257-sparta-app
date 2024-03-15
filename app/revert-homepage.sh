@@ -1,7 +1,7 @@
 sudo mv views/index.ejs.backup views/index.ejs
 
 # Navigate to the app directory
-cd repo/tech257-sparta-app/app
+cd /tech257-sparta-app/app
 
 pm2 stop all
 
