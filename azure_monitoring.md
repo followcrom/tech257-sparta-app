@@ -52,15 +52,13 @@ Visualizing the CPU usage during load testing:
 
 # Setting up CPU Usage Alert on Azure
 
-To set up a CPU usage alert on Azure, follow these steps:
-
 1. From the VM Overview -> Monitor -> Create Alert Rule
 
 2. Select condition (e.g. Metric -> CPU Usage)
 
-3. Define the Alert Logic. For example, set the threshold value for the CPU usage that will trigger the alert. For example, you can set it to 90% to receive an alert when the CPU usage exceeds 90%.
+3. Define the Alert Logic. For example, set the threshold value for the CPU usage that will trigger the alert.
 
-4. Assign an action group with sends an email notification to a user when the alert is triggered.
+4. Assign an action group which sends an email notification to a user when the alert is triggered.
 
 5. Review and create the alert rule.
 

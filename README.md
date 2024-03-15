@@ -187,9 +187,7 @@ sudo systemctl restart mongod
 
 ## Run Script on new Image
 
-As the new image is a copy of the original VM, it already has the **nginx server** installed and node modules, so we can trim our deploy script a little.
-
-**Note** As we are creating the new VM from an image built for the one we buit with user Data, the app itself is in a different directory: **/repo/app**.
+As the new image is a copy of the original VM, it already has **nginx server** and all the dependences installed, so we can trim our deploy script a little.
 
 Here is the reduced User Data:
 
