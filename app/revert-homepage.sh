@@ -1,7 +1,7 @@
-sudo mv views/index.ejs.backup views/index.ejs
+# Not suitable for user data
+cd /tech257-sparta-app/app/
 
-# Navigate to the app directory
-cd /tech257-sparta-app/app
+sudo mv views/index.ejs.backup views/index.ejs
 
 pm2 stop all
 
