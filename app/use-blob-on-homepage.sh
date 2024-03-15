@@ -15,7 +15,26 @@ az storage account update --name tech257richardstorage --resource-group tech257 
 az storage container create --name imgs --account-name tech257richardstorage --auth-mode login
 
 # NOTE: This DOES NOT work. Returns "The specified resource does not exist."
-az storage container set-permission --name imgs --account-name tech257richardstorage --auth-mode login --public-access container
+az storage container set-permission --name imgs --account-name tech257richardstorage --auth-mode login --public-access container --debug --permissions "r"
+
+
+# Issue the command to set permissions on the container
+# az storage container set-permission --account-name <account_name> --name <container_name> --permissions <permissions>
+
+# Wait until the permissions have been applied
+while true
+do
+  # Check the status of the container
+  status=$(az storage container show --account-name tech257richardstorage --name imgs --query "publicAccess" --output tsv)
+
+  # If the permissions have been applied, break out of the loop
+  if [ "$status" = "container" ]; then
+    break
+  fi
+
+  # If the permissions have not been applied, wait for 5 seconds before checking again
+  sleep 5
+done
 
 # Delay for 15 seconds
 
