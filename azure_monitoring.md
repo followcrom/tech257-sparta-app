@@ -119,7 +119,7 @@ Load balancers can act as a single entry point for incoming traffic, providing a
 
 ## Create an unhealthy instance
 
-Stop and start one of the scale sets instances. This will start the instance without restarting the application, resulting in a 502 bad gateway error.
+Stop and start one of the scale set's instances. This will start the instance without restarting the application, resulting in a 502 bad gateway error.
 
 ![alt text](imgs/uh-i.jpg)
 
@@ -137,7 +137,7 @@ In the terminal, run the following command to SSH into an instance:
 ssh -i ~/.ssh/richard-az-key -p 50000 azureuser@<lb-ip-address>
 ```
 
-Increment the port number by 1 for each instance. it starts at 50000 because the NAT pool is set from 50000.
+Increment the port number by 1 for each instance (starts at 50000 because the NAT pool is set from 50000).
 
 ## Delete a VM Scale Set
 
@@ -145,7 +145,7 @@ We need to delete four elements to delete a VM Scale Set:
 
 - Scale set
 - Load balancer
-- Public ip address
+- Public IP address
 - Network security group
 
 Deleting them in the above order is recommended.
