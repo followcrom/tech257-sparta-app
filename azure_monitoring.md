@@ -168,6 +168,8 @@ Assign the following IP addresses to the subnets:
     - public: 10.0.3.0/24
     - DMZ: 10.0.4.0/24
 
+![alt text](imgs/3sub/vnet.jpg)
+
 Then we can create our VMs. We'll start with the DB VM as we'll need that VM's private IP address to configure the App VM.
 
 Create the three VMs, using images where possible and minimal user data where necessary.  Add the DM VM's private IP address to the App VM's environment variables as part of the user data.
@@ -191,6 +193,7 @@ Ping the DB VM's private IP address from the APP VM to check they are talking to
 ```bash
 ping 10.0.4.4
 ```
+
 
 Enable IP forwarding on the NVA to allow it to forward traffic between the subnets. The first step is to do this on the console. Then SSH into the NVA VM and check if the NVA is forwarding traffic between the subnets.
 
