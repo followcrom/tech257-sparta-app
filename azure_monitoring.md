@@ -150,3 +150,141 @@ We need to delete four elements to delete a VM Scale Set:
 
 Deleting them in the above order is recommended.
 
+# 3-Subnet Architecture
+
+**Network virtual appliances (NVAs)** are virtual appliances that perform network functions such as routing, firewalling, and VPNs. They can be used to secure and optimize traffic between virtual machines in Azure.
+
+We can create a VNET with three subnets:
+
+    -private
+
+    -public
+
+    -DMZ (demilitarized zone)
+
+Assign the following IP addresses to the subnets:
+
+    - private: 10.0.2.0/24
+    - public: 10.0.3.0/24
+    - DMZ: 10.0.4.0/24
+
+Then we can create our VMs. We'll start with the DB VM as we'll need that VM's private IP address to configure the App VM.
+
+Create the three VMs, using images where possible and minimal user data where necessary.  Add the DM VM's private IP address to the App VM's environment variables as part of the user data.
+
+```bash
+#!/bin/bash
+
+export DB_HOST=mongodb://10.0.4.4:27017/posts
+
+# Navigate to the app directory from user data
+cd tech257-sparta-app/app/
+
+pm2 stop all
+
+# Use pm2 to start app and ensure it runs in the background
+pm2 start app.js
+```
+
+Ping the DB VM's private IP address from the APP VM to check they are talking to each.
+
+```bash
+ping 10.0.4.4
+```
+
+Enable IP forwarding on the NVA to allow it to forward traffic between the subnets. The first step is to do this on the console. Then SSH into the NVA VM and check if the NVA is forwarding traffic between the subnets.
+
+```bash
+sudo sysctl net.ipv4.ip_forward
+```
+
+This is the file to edit to enable IP forwarding:
+
+```bash
+sudo nano /etc/sysctl.conf
+```
+
+Uncomment the following line:
+
+```bash
+net.ipv4.ip_forward=1
+```
+
+To apply the changes, run the following command:
+```bash
+sudo sysctl -p
+```
+
+Or for simplicity, run:
+
+```bash
+sudo sysctl -w net.ipv4.ip_forward=1
+```
+
+But this is allowing ALL traffic to be forwarded. To restrict it to only the subnets, we need to add **iptables rules**.
+
+Create a file in the home directory called `config-ip-tables.sh` (`sudo nano config-ip-tables.sh`) and add the following content to it:
+
+```bash
+#!/bin/bash
+ 
+# configure iptables
+ 
+echo "Configuring iptables..."
+ 
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -A INPUT -i lo -j ACCEPT
+sudo iptables -A OUTPUT -o lo -j ACCEPT
+
+# The above comands allow traffic on the loopback interface. That means that the traffic is allowed to go from the VM to itself and vice versa.
+
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# The above comands allow traffic that is part of an established connection or related to an established connection. This is important because it allows the VM to receive responses to the requests it sends out.
+
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -A OUTPUT -m state --state ESTABLISHED -j ACCEPT
+ 
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -A INPUT -m state --state INVALID -j DROP
+ 
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
+ 
+# uncomment the following lines if want allow SSH into NVA only through the public subnet (app VM as a jumpbox)
+# this must be done once the NVA's public IP address is removed
+#sudo iptables -A INPUT -p tcp -s 10.0.2.0/24 --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+#sudo iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
+ 
+# uncomment the following lines if want allow SSH to other servers using the NVA as a jumpbox
+# if need to make outgoing SSH connections with other servers from NVA
+#sudo iptables -A OUTPUT -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+#sudo iptables -A INPUT -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+ 
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -A FORWARD -p tcp -s 10.0.2.0/24 -d 10.0.4.0/24 --destination-port 27017 -m tcp -j ACCEPT
+ 
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -A FORWARD -p icmp -s 10.0.2.0/24 -d 10.0.4.0/24 -m state --state NEW,ESTABLISHED -j ACCEPT
+ 
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -P INPUT DROP
+ 
+# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+sudo iptables -P FORWARD DROP
+ 
+echo "Done!"
+echo ""
+ 
+# make iptables rules persistent
+# it will ask for user input by default
+ 
+echo "Make iptables rules persistent..."
+sudo DEBIAN_FRONTEND=noninteractive apt install iptables-persistent -y
+echo "Done!"
+echo ""
+```
+
+Test the rules by pinging the DB VM from the App VM. If the ping is successful, the rules are working. Now, the NVA is only forwarding traffic between the subnets.
