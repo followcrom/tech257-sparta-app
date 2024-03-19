@@ -102,10 +102,3 @@ echo
 # Use pm2 to start app and ensure it runs in the background
 pm2 start app.js --name "sparta-test-app"
 ```
-
-
-## Step 5: Done
-
-You're done! You now have a VM on AWS.
-```
-
