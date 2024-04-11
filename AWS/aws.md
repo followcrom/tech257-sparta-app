@@ -19,27 +19,32 @@ From the instance's **Monitoring** tab:
 
 ![Auto Scaling Groups](../imgs/aws_auto_scaling.jpg)
 
-Use an ami (Amazon Machine Image) to scale new instances from. This way, you can ensure that all instances have the same configuration and software. They will launch faster.
+Use an ami (Amazon Machine Image) to scale new instances from. This way, you can ensure that all instances have the same configuration and software. They will also launch faster.
 
-To create an AMI:
+### Create an AMI:
 
 1. Select the instance you want to create an AMI from.
 2. **Actions** -> **Image and templates** -> **Create image**.
 3. Enter a name and description for your AMI.
-4. Add a tag can add a name to the instance, e.g. "Name", "ec2-instance".
+4. Adding a tag can add a name to the instance, e.g. _"Name", "ec2-instance"_.
 5. **Create image**.
+
+### Delete an AMI:
+
+1. **Actions** -> **Deregister**.
+2. **Actions** -> **Delete**.
+
+When deleting an AMI, you will be asked if you want to delete the snapshots associated with the AMI. This is recommended as the snapshots store the data and are what cost money.
 
 ### Create a Launch template
 
-First we need to create a **Launch template**. This is very similar to creating an AMI, but here are some things to note:
+We should create a **Launch template** to launch our ASG from. This is very similar to creating an AMI, but here are some things to note:
 
 - Choose an AMI from MY AMIs. This should be the AMI you created in the previous step.
 - **DO** select an instance type.
 - **DO** add a key pair. This is important for SSH access to your instances.
 - **DO NOT** select a subnet. This will be done in the Auto Scaling Group.
-- Add very basic user data start the app.
-
-User data:
+- Add very basic user data start the app:
 
 ```bash
 #!/bin/bash
@@ -71,8 +76,8 @@ Now we can create the Auto Scaling Group. AWS console breaks this into seven ste
 - Load balancer type should be _Application Load Balancer_.
 - Make it _internet-facing_.
 - Create a new target group.
-- Default routing forward to the taget group.
-- Turn on Elastic Load Balancing health checks.
+- _Default routing (forward to)_ the taget group.
+- **Turn on Elastic Load Balancing health checks**.
 
 **Step 4**:
 
@@ -168,8 +173,5 @@ pm2 start app.js
 
 ### Delete a VPC
 
-1. First delete instances, subnets, route tables, internet gateways, and security groups associated with the VPC.
-2. Click **Your VPCs**.
-3. Select the VPC you want to delete.
-4. Click **Actions** -> **Delete VPC**.
-5. Enter the VPC ID and click **Delete VPC**.
+1. First delete instances running in the VPC.
+2. Now we can delete the VPC. AWS will offer us the option to delete all the resources associated with the VPC (subnets, IGW, SG, Route table, etc.), which is a good idea.
