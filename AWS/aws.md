@@ -17,6 +17,8 @@ From the instance's **Monitoring** tab:
 
 ## Auto Scaling Groups
 
+![Auto Scaling Groups](../imgs/aws_auto_scaling.jpg)
+
 Use an ami (Amazon Machine Image) to scale new instances from. This way, you can ensure that all instances have the same configuration and software. They will launch faster.
 
 To create an AMI:
@@ -93,3 +95,81 @@ To test the Auto Scaling Group, get the DNS name of the Load Balancer and naviga
 ### Delete the Auto Scaling Group
 
 To delete the Auto Scaling Group, we should also delete the load balancer and target group. Also, delete the Launch template if necessary.
+
+## VPC
+
+A Virtual Private Cloud (VPC) is a virtual network dedicated to your AWS account. It is logically isolated from other virtual networks in the AWS cloud. You can launch your AWS resources, such as Amazon EC2 instances, into your VPC.
+
+### Create a VPC
+
+1. Go to the VPC Dashboard.
+2. Click **Create VPC**.
+Choose VPC only.
+3. Enter a name and CIDR block: 10.0.0.0/16.
+4. Click **Create**.
+
+### Create a subnet
+
+1. Select the VPC you created.
+One public and one private subnet is a good starting point.
+Seperate availability zones is a good idea.
+Public subnet CIDR block: 10.0.2.0/24. The gives us 256 IP addresses.
+Private subnet CIDR block: 10.0.3.0/24
+
+### Create an Internet Gateway
+
+1. Create an internet gateway.
+2. Attach the internet gateway to your VPC. Actions -> Attach to VPC.
+
+### Create a route table
+
+1. We only need a route table for the public subnet as AWS will create a default route table for the private subnet. The default route table (for the private subnet) will allow all the VPC's internal resources to communicate with each other.
+2. Select the VPC in the dropdown.
+3. Associate the subnet with the route table. **Edit subnet associations -> select the public subnet -> save**.
+We only need to associate the public subnet with the route table as the private subnet will use the default route table. Therefore, **Subnet associations -> explicit subnet associations: public subnet**. **Subnets without explicit associations: private subnet**, which will use the default route table.
+4. To link the public subnet to the internet gateway, we need to add a route to the route table. **Routes -> Edit route table -> add route -> destination: 0.0.0.0/0 -> target: internet gateway.** If we have properly associated the VPC with the internet gateway, it should appear in the dropdown.
+
+![Edit route table](../imgs/route_table.jpg)
+
+_**Note**: Destination is a confusing term to me, but it is the destination of the traffic, not the destination of the route. The destination traffic from the internet to the instance's public IP address will be routed from the IGW to the instance._
+
+### Create a security group
+
+Add inbound and outbound rules to your security group. This should be done inside the VPC as security groups are VPC-specific.
+
+### Check resource map
+
+Can see this in **Your VPCs**. We should see the public subnet links to the route table we created **AND** the internet gateway. The private subnet should link to just the default route table. The public subnet in this example has a green circle with the Availability Zone, which means it is associated with the IGW. The private subnet has a blue sqaure for the Availability Zone, which means it is associated with the default route table.
+
+![resource map](../imgs/resource_map.jpg)
+
+### Launch an EC2 instance
+
+Create the DB instance first as we need the private IP address for the app instance to connect to the DB instance.
+
+In Network settings -> choose the VPC, the private subnet (for the DB) and the security group. We **DO NOT** need a public IP address for the DB instance so can Disable the auto-assign public IP.
+
+For the app instance, choose the public subnet and the security group. We **DO** need a public IP address for the app instance.
+
+Add a short user data script to the app instance to start the app. Be sure to change the IP address to the private IP address of the DB instance.
+
+```bash
+#!/bin/bash
+
+export DB_HOST=mongodb://10.0.3.142:27017/posts
+
+cd /tech257-sparta-app/app
+
+pm2 stop all
+
+# Use pm2 to start app and ensure it runs in the background
+pm2 start app.js
+```
+
+### Delete a VPC
+
+1. First delete instances, subnets, route tables, internet gateways, and security groups associated with the VPC.
+2. Click **Your VPCs**.
+3. Select the VPC you want to delete.
+4. Click **Actions** -> **Delete VPC**.
+5. Enter the VPC ID and click **Delete VPC**.
