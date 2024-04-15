@@ -175,3 +175,156 @@ pm2 start app.js
 
 1. First delete instances running in the VPC.
 2. Now we can delete the VPC. AWS will offer us the option to delete all the resources associated with the VPC (subnets, IGW, SG, Route table, etc.), which is a good idea.
+
+
+## S3
+
+S3 is a storage service provided by AWS. It is object-based storage, which means it stores data as objects. Each object consists of a file, data, and metadata. The data is stored in buckets, which are similar to folders.
+
+For simplicity we can make an alias for python3:
+
+`alias py=python3`
+
+### Login to AWS CLI
+
+```bash
+aws configure
+
+# List the configured profiles
+aws configure list
+```
+
+### Create a bucket from CLI
+
+```bash
+# make bucket (mb)
+
+aws s3 mb s3://tech257-richard-first-bucket
+
+# list buckets (ls)
+
+aws s3 ls s3://tech257-richard-first-bucket
+
+# upload a file
+
+aws s3 cp text.txt s3://tech257-richard-first-bucket
+
+# download a file
+
+aws s3 cp s3://tech257-richard-first-bucket/text.txt textdl.txt
+
+# sync a directory
+
+aws s3 sync s3://tech257-richard-first-bucket/text.txt
+
+# delete a file (rm). Caution: this is permanent and without warning
+
+:aws s3 rm s3://tech257-richard-first-bucket/text.txt:
+
+aws s3 rm s3://tech257-richard-first-bucket --recursive
+
+# delete a bucket
+
+aws s3 rb s3://tech257-richard-first-bucket
+```
+
+: aws s3 rm s3://tech257-richard-first-bucket/text.txt :
+
+:boom: aws s3 rm s3://tech257-richard-first-bucket/text.txt :boom:
+
+### Using boto3
+
+#### Create a bucket
+
+```python
+import boto3
+
+region = 'eu-west-1'
+
+s3_client = boto3.client('s3', region_name=region)
+location = {'LocationConstraint': region}
+s3_client.create_bucket(Bucket='tech257-richard-bucket', CreateBucketConfiguration=location)
+```
+
+#### Delete a bucket
+
+```python
+import boto3
+
+# Function to delete all objects in a bucket
+def empty_bucket(bucket_name):
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(bucket_name)
+    
+    # Now delete all objects in the bucket
+    bucket.objects.all().delete()
+
+# Function to delete a bucket
+def delete_bucket(bucket_name):
+    try:
+        s3_client = boto3.client('s3')
+        # First empty the bucket
+        empty_bucket(bucket_name)
+        # Then delete the bucket
+        s3_client.delete_bucket(Bucket=bucket_name)
+        print(f"Bucket '{bucket_name}' deleted successfully.")
+    except boto3.exceptions.Boto3Error as e:
+        print(f"Error: {e}")
+
+bucket_name = 'tech257-richard-bucket'
+delete_bucket(bucket_name)
+```
+
+#### Upload a file
+
+```python
+import boto3
+
+region = 'eu-west-1'
+
+s3_client = boto3.client('s3', region_name=region)
+
+s3_client.delete_object(Bucket='tech257-richard-bucket', Key='text.txt')
+```
+
+#### Download a file
+
+```python
+import boto3
+
+region = 'eu-west-1'
+
+s3_client = boto3.client('s3', region_name=region)
+
+s3_client.download_file('tech257-richard-bucket', 'text.txt', 'textdl.txt')
+```
+
+#### List buckets
+
+```python
+import boto3
+
+region = 'eu-west-1'
+
+s3_client = boto3.client('s3', region_name=region)
+
+# Call the list_buckets method to retrieve the buckets
+response = s3_client.list_buckets()
+
+# Response contains a Buckets key that is a list of bucket dictionaries
+print("List of S3 Buckets:")
+for bucket in response['Buckets']:
+    print(f"- {bucket['Name']}")
+```
+
+#### Upload a file
+
+```python
+import boto3
+
+region = 'eu-west-1'
+
+s3_client = boto3.client('s3', region_name=region)
+
+s3_client.upload_file('/home/ubuntu/text.txt', 'tech257-richard-bucket', 'text.txt')
+```
