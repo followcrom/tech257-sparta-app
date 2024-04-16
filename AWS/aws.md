@@ -328,3 +328,45 @@ s3_client = boto3.client('s3', region_name=region)
 
 s3_client.upload_file('/home/ubuntu/text.txt', 'tech257-richard-bucket', 'text.txt')
 ```
+
+## Alarms
+
+![alt text](../imgs/aws-alert.jpg)
+
+### Create an alarm
+
+1. Go to the CloudWatch dashboard.
+2. Click **Alarms** -> **Create alarm**.
+3. Choose a metric, e.g. EC2 -> Per-Instance Metrics -> CPUUtilization.
+4. Choose the instance you want to monitor.
+5. Set the threshold, e.g. 70%.
+6. Set the period, e.g. 1 minute.
+7. Set the evaluation period, e.g. 2 minutes.
+8. Set the action, e.g. **Create a new topic**.
+9. Set the notification, e.g. **Email**.
+10. Click **Create alarm**.
+
+### Create an SNS topic
+
+1. Go to the SNS dashboard.
+2. Click **Topics** -> **Create topic**.
+3. Enter a name and display name.
+4. Click **Create topic**.
+5. Click **Create subscription**.
+6. Choose the protocol, e.g. **Email**.
+7. Enter the endpoint, e.g. your email address.
+8. Click **Create subscription**.
+
+### Test the alarm
+
+```bash
+sudo apt-get install apache2-utils -y
+
+# Send 1000 requests with 100 concurrent requests
+
+ab -n 1000 -c 100 http://3.254.167.171/ | grep "Requests per second"
+
+# Send 10000 requests with 200 concurrent requests
+
+ab -n 10000 -c 200 http://3.254.167.171/
+```
