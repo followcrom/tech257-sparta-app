@@ -73,10 +73,32 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 ENV FLASK_APP=northwind_web.py
-ENV DB_HOST="--"
 
 # Run app.py when the container launches
 CMD [ "waitress-serve", "--port=5000", "northwind_web:app"]
 ```
 
 ![Northwind app as Docker container](imgs/nw_app_docker.jpg)
+
+## Kubernetes
+
+![Node app as Docker image](imgs/node_app_docker.jpg)
+
+# Command to build a Docker image with tag 'v1'
+docker build -t sta:v1 .
+
+docker run -d -p 3000:3000 slsta:v1
+
+# commit the image
+
+docker commit af2c6b7c24a2 followcrom/sta:v1
+
+# push the image to Docker Hub
+
+docker push followcrom/sta:v1
+
+# test the image
+
+docker run -d -p 3000:3000 followcrom/sta:v1
+
+docker run -d -p 3030:3000 spencerley/spencer-sparta-test-app
