@@ -78,27 +78,123 @@ ENV FLASK_APP=northwind_web.py
 CMD [ "waitress-serve", "--port=5000", "northwind_web:app"]
 ```
 
-![Northwind app as Docker container](imgs/nw_app_docker.jpg)
 
-## Kubernetes
+# Kubernetes
 
-![Node app as Docker image](imgs/node_app_docker.jpg)
+1. Create a deployment that manages your pods, e.g.:
 
-# Command to build a Docker image with tag 'v1'
-docker build -t sta:v1 .
+```yaml
+apiVersion: apps/v1
+kind: Deployment
 
-docker run -d -p 3000:3000 slsta:v1
+metadata:
+  name: nginx-deployment
 
-# commit the image
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: followcrom/nginx-custom:v3
+          ports:
+            - containerPort: 80
+```
 
-docker commit af2c6b7c24a2 followcrom/sta:v1
+2. Save this as nginx_deployment.yaml
 
-# push the image to Docker Hub
+3. Create the deployment:
 
-docker push followcrom/sta:v1
+```bash
+kubectl create -f nginx_deployment.yaml
 
-# test the image
+# if necessary, delete a previous deployment and recreate it:
+kubectl delete deployment nginx-deployment
 
-docker run -d -p 3000:3000 followcrom/sta:v1
+# delete service
 
-docker run -d -p 3030:3000 spencerley/spencer-sparta-test-app
+kubectl delete service nginx-svc
+
+kubectl get deployments
+
+kubectl get pods
+```
+
+4. Create a service that exposes your deployment to the outside world, e.g.:
+
+```yaml
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: nginx-svc
+  namespace: default
+
+spec:
+  ports:
+    - nodePort: 30001
+      port: 80
+      targetPort: 80
+
+  selector:
+    app: nginx
+
+  type: NodePort
+```
+
+5. Save this as nginx_service.yaml
+
+`kubectl create -f nginx_service.yaml`
+
+6. Check that your service is running. Go to localhost:30001 in your browser.
+
+
+## K8 cmds
+
+```bash
+kubectl get all
+kubectl get deployments
+kubectl get pods
+kubectl get services
+
+kubectl create -f app_deployment.yml
+
+kubectl delete deployment nginx-deployment
+
+kubectl get pods
+
+kubectl create -f app_service.yml
+
+### scale a deployment
+
+kubectl scale deployment sta-deployment --replicas=0
+
+### delete a service
+
+kubectl delete service sta-svc
+
+# delete one pod
+
+kubectl delete pod <pod-name>
+
+# delete all deployments
+
+kubectl delete deployment --all
+
+# exec into a pod
+
+kubectl exec -it <pod-name> -- /bin/bash
+
+kubectl exec -it sta-deployment-6df8784669-86c2f -- node seeds/seed.js
+
+# edit a deployment
+kubectl edit deployment <deployment-name>
+```
+
+
